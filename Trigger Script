@@ -1,0 +1,15 @@
+//The purpose of this trigger is to automatically assign a technician with the appropriate specialty to a work order when it is created
+
+create trigger AssignTechnician
+on WorkOrders
+after insert
+as
+	update workorders
+	set techID = 
+	(select TOP 1 techID
+		from technicians
+			where tradeSpecialty in
+			(select specialty
+				from inserted))
+		where workordernum IN
+			(select workordernum from inserted);
