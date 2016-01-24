@@ -1,0 +1,176 @@
+in10/8/2015
+
+create table EMPLOYEES(
+	EmpID				char(3)			not null		unique,
+	EmpFirstName		varchar(30)		not null,
+	EmpLastName		varchar(30)		not null,
+	EmpAddress			varchar(40)		not null,
+	EmpPhone			char(12)		not null,
+	ContactFirstName		varchar(30)		not null,
+	ContactLastName		varchar(30)		not null,
+	ContactPhone			char(12)		not null,
+	ContactRelationship		varchar(20)		not null,
+	JobType			varchar(20)		not null,
+	PRIMARY KEY (EmpID)
+)
+
+create table ACCTINFO(
+	EmpID				char(3)			not null		unique,
+	AcctPassword			varchar(30)		not null,
+	DateCreated			date			not null,
+	DateRetired			date,
+	PRIMARY KEY (EmpID),
+	FOREIGN KEY (EmpID) references EMPLOYEES (EmpID)
+)
+
+create table TECHNICIANS(
+	TechID				char(3)			not null		unique,
+	TradeSpecialty		varchar(20)		not null,
+	CertNumber			char(6)			not null,
+	CertRenewDate		date			not null,
+	YrStartedInTrade		date    			not null,
+	PRIMARY KEY (TechID),
+	FOREIGN KEY (TechID) references EMPLOYEES (EmpID)
+)
+
+create table OFFICEPERSONNEL(
+	OpID				char(3)			not null		unique,
+	HrsPerWk			decimal(4,2)		not null,
+	HourlyRate			decimal(5,2)		not null,
+	PRIMARY KEY (OpID),
+	FOREIGN KEY (OpID) references EMPLOYEES (EmpID)
+	)
+
+create table PROPERTIES(
+	PropID				char(5)			not null		unique,
+	PropName			varchar(20),
+	PropAddress			varchar(40)		not null,
+	PropCity			varchar(20)		not null,
+	PropState			varchar(2)		not null,
+	PropZip			char(5)			not null,
+	PropPhone			char(12),
+	PropManager			char(3)			not null,
+	PropAcctNo			char(6)			not null,
+	TechOnProp			char(3)			not null,
+	PRIMARY KEY (PropID),
+	FOREIGN KEY (PropManager) references EMPLOYEES (EmpID),
+	FOREIGN KEY (TechOnProp) references TECHNICIANS (TechID)
+)
+
+create table RESIDENTS(
+	ResID				char(3)			not null		unique,
+	ResFName			varchar(30)		not null,
+	ResLName			varchar(30)		not null,
+	ResPhone			char(12)		not null,
+	ResAltPhone			char(12),
+	ResEmail			varchar(30),
+	PRIMARY KEY (ResID)
+)
+
+create table SUPPLIERS(
+	SupplierID			char(5)			not null		unique,
+	SupplierName			varchar(30)		not null,
+	SupplierAddress		varchar(40)		not null,
+	SupplierCity			varchar(30)		not null,
+	SupplierState			varchar(2)		not null,
+	SupplierZip			char(5)			not null,
+	SupplierPhone			char(12)		not null,
+	SupplierContact		varchar(30)		not null,
+	SupplierURL			varchar(30),
+	DeliveryRating			varchar(10)		not null,
+	PRIMARY KEY (SupplierID)
+)
+
+create table ASSETS(
+	AssetID			char(5)			not null		unique,
+	AssetSN			varchar(20),
+	AssetDescription		varchar(150),
+	AssetType			varchar(20)		not null,
+	AssetLocation			varchar(10)		not null,
+	AssetServiceDate		date			not null,
+	SupplierID			char(5)			not null,
+	PropID 			char(5)			not null	,
+	PRIMARY KEY (AssetID),
+	FOREIGN KEY (PropID) references PROPERTIES (PropID)
+)
+
+create table TASKS(
+	TaskID				char(5)			not null		unique,
+	TaskType			varchar(30)		not null,
+	PRIMARY KEY (TaskID)
+)
+
+create table WORKORDERS(
+	WorkOrderNum		char(6)			not null		unique,
+	PropID				char(5)			not null,
+	WorkDescription		varchar(150)		not null,
+	DesiredDate			date,
+	EmpID				char(3)			not null,
+	StartDate			date			not null,
+	EndDate			date,
+	LastMaintenance		date,
+	CreatedBy			char(3)			not null,
+	DateCreated			date			not null,
+	TaskID				char(5)			not null,
+	WorkPriority			char(1)			not null,
+	TotalHours			char(5)			not null,
+	JobNotes			varchar(150),
+	WorkStatus			varchar(20)		not null,
+	RootCause			varchar(75),
+	specialty			varchar(30)
+	AssetID			char(5)			not null,
+	ResID				char(3),			
+	PRIMARY KEY (WorkOrderNum),
+	FOREIGN KEY (PropID) references PROPERTIES (PropID),
+	FOREIGN KEY (EmpID) references EMPLOYEES (EmpID),
+	FOREIGN KEY (CreatedBy) references EMPLOYEES (EmpID),
+	FOREIGN KEY (AssetID) references ASSETS (AssetID),
+FOREIGN KEY (ResID) references RESIDENTS (ResID)
+)
+
+create table PARTS(
+	PartID				char(6)		not null		unique,
+	SupplierID			char(5)			not null,
+	PartCategory			varchar(30)		not null,
+	PartSubCategory		varchar(30),
+	PartDescription		varchar(50)		not null,
+	PartQuantity			char(6)			not null,
+	PartFeatures			varchar(50),
+	ReorderPoint			char(5)			not null,
+	ReorderQuantity		char(6)			not null,
+	PartPrice			decimal(4,2)
+	PRIMARY KEY (PartID),
+	FOREIGN KEY (SupplierID) references SUPPLIERS (SupplierID)
+
+)
+
+create table PARTSUPPLIERS(
+	PartID				char(6)		not null		unique,
+	SupplierID			char(5)		not null		unique,
+	PRIMARY KEY (PartID, SupplierID),
+	FOREIGN KEY (PartID) references PARTS (PartID),
+	FOREIGN KEY (SupplierID) references SUPPLIERS (SupplierID)
+)
+
+create table PARTSUSED(
+	PartID				char(6)		not null		unique,
+	TaskID				char(5)			not null		unique,
+	PRIMARY KEY (PartID, TaskID),
+	FOREIGN KEY (PartID) references PARTS (PartID),
+	FOREIGN KEY (TaskID) references TASKS (TaskID)
+)
+
+create table ACCIDENTS(
+	AccidentID			char(6)			not null		unique,
+	EmpID				char(3)			not null,
+	DateOccured			date			not null,
+	AccidentAddress		varchar(40)		not null,
+	AccidentType			varchar(20)		not null,
+	WorkOrderNum		char(6)			not null,
+	SuspensionDate		date			not null,
+	ResumeDate			date,
+	AccidentStatus		varchar(20)		not null,
+	PRIMARY KEY (AccidentID),
+	FOREIGN KEY (EmpID) references EMPLOYEES (EmpID),
+	FOREIGN KEY (WorkOrderNum) references WORKORDERS (WorkOrderNum)
+)
